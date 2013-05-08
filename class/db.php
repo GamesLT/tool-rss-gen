@@ -2,25 +2,39 @@
 
 class gcDB extends mysqli {
     
-    public function __construct() {
+    /**
+     * @return \gcDB
+     */
+    public static function getInstance() {
+        static $instance = null;
+        if ($instance === null)
+            $instance = new self();
+        return $instance;
+    }
+    
+    protected function __construct() {
         parent::connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
     }
     
-    public function quickInsert(array $array, $table = 'data') {
-        if (!isset($array[0]))
-            $data = array($array);
-        else
-            $data = $array;
-                
-        $sparts = array();
-        foreach ($data as $content) {
-            $tmp = '(';
-            foreach ($content as $value)
-                $tmp .= '\'' . str_replace('\'', '\'\'', $value) .'\'';
-            $tmp .= ')';
-            $sparts[] = $tmp;
+    public function makeArraySmaller(&$array) {                
+        foreach ($array as $key => $value) {
+            if (is_array($value))
+                $array[$key] = json_encode($value);
         }
-        $sql = 'INSERT INTO ' . $table . '(`' . implode('`, `',array_keys($array[0])) . '`) VALUES' . implode(', ', $sparts);
+    }
+    
+    public function quickInsert(array $array, $table = 'data') {
+        
+        $this->makeArraySmaller($array);
+                        
+        $tmp = '(';
+        foreach ($array as $value)
+            $tmp .= '\'' . str_replace('\'', '\'\'', $value) .'\',';
+        $tmp = substr($tmp, 0, -1);
+        $tmp .= ')';
+         
+        $sql = 'INSERT INTO ' . $table . '(`' . implode('`, `',array_keys($array)) . '`) VALUES' . $tmp . ';';
+        error_log($sql);
         return $this->query($sql);
     }
     

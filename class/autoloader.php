@@ -38,6 +38,9 @@ class gcAutoloader {
             if (substr($class, 0, strlen($class_start)) != $class_start)
                 continue;
             $filename = is_callable($path)?$path($class):$path;
+            if (substr($filename, -strlen(DIRECTORY_SEPARATOR . '.php')) == DIRECTORY_SEPARATOR . '.php')
+                    return false;
+                
            // echo $filename . "<br />";  
             require $filename;
             return true;
