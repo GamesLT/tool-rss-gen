@@ -13,9 +13,11 @@ Pagal nutylėjimą vykdomas RSS'o generavimas iš duomenų. Norint pasiimti duom
 
 Licenzija? 
 --------------------
-**Public Domain** :)
+[Public Domain](http://creativecommons.org/licenses/publicdomain/) :)
 
-Šiek tiek apie katalogus. 
+P.S.: naudojamoms trečių asmenų bibliotekoms galioja atskiros licenzijos!
+
+Šiek tiek apie katalogus
 --------------------
 _libraries/_ kataloge sudėtos visos bibliotekos iš trečių šalių (joms galioja atskiros licenzijos, todėl pasidomėkite jomis patys).
 _interfaces/_ skirtas PHP interfeisų aprašymams.
