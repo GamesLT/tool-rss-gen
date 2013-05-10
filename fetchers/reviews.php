@@ -27,6 +27,7 @@ class fetchReviews {
                     'date' => trim(substr($element->title, strlen('Patalpinimo data:'))),
                     'image' => $this->getImageForURL($element->href),
                     'author' => ($author = $this->getAuthor($element->href)),
+                    'interesting' => true
                 );
             } else {
                 list($line['platform'], $line['game']) = array_map('trim', explode(',', $element->plaintext, 2));
@@ -109,7 +110,7 @@ class fetchReviews {
     }
 
     public function getReviewsPageHTML() {
-        return $this->getURLContents('http://www.games.lt/g/all.all_apzvalgos/0.201304?sev=month');
+        return $this->getURLContents('http://www.games.lt/g/all.apzvalgos');
     }
 
 }

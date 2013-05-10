@@ -7,20 +7,43 @@
 class actionRSS implements iAction {    
     
     public function getVars() {
-        return array('type' => 'int');
+        return array('type' => 'string', 'interesting' => 'int');
     }
     
     public function exec(array $params) {
-        $db = new gcDB();
-        $ret = '<?xml version="1.0" encoding="ISO-8859-1" ?>';
+        $db = gcDB::getInstance();
+        $ret = '<?xml version="1.0" encoding="UTF-8" ?>';
         $ret .= $this->renderXMLStartTag('rss', array('version' => '2.0'));
         $ret .= $this->renderXMLStartTag('channel');
-        switch ($param['type']) {
+        $ret .= $this->renderXMLFastTag('title', 'Games.lt data' . ($params['type']?' - ' . $params['type']:''));
+        $ret .= $this->renderXMLFastTag('description', 'Games.lt data feed');
+        $ret .= $this->renderXMLFastTag('link', 'http://www.games.lt');
+        if ($params['interesting'] > -1) {
+            if (!empty($params['type']))
+                $sql = sprintf('type = \'%s\' AND interesting = %d ORDER BY date DESC LIMIT %d', str_replace('\'', '\'\'', $params['type']), $params['interesting'], 10);
+            else
+                $sql = sprintf('interesting = %d ORDER BY date DESC LIMIT %d', $params['interesting'], 10);
+        } else {
+            if (!empty($params['type']))
+                $sql = sprintf('type = \'%s\' ORDER BY date DESC LIMIT %d', str_replace('\'', '\'\'', $params['type']), 10);
+            else
+                $sql = sprintf('1 ORDER BY date DESC LIMIT %d', 10);
+        }        
+        foreach ($db->quickFetch($sql) as $record) {
+            $ret .= $this->renderXMLStartTag('item');
+            $ret .= $this->renderXMLFastTag('title', '<![CDATA[ ' . $record['title'] . ']]>');
+            $ret .= $this->renderXMLFastTag('link', $record['link']);
+            $desc = $record['text'];
+            if (!empty($record['image']))
+                $desc .= '<p><img src="' . $record['image'] . '" alt="'.htmlentities($record['title']).'" /></p>';
+            $ret .= $this->renderXMLFastTag('description', '<![CDATA[ ' . $desc . ']]>');
+            $ret .= $this->renderXMLFastTag('guid', $record['id'], array('isPermaLink' => 'false'));
+            $ret .= $this->renderXMLFastTag('pubDate', date('r', $record['date']));
+            $ret .= $this->renderXMLCloseTag('item');
         }
-        $ret .= $this->renderXMLFastTag('title', 'Games.lt ');
-        foreach ($db->quickFetch(sprintf('type = %d LIMIT %d', $params['type'], 10)) as $record) {
-            
-        }
+        $ret .= $this->renderXMLCloseTag('channel');
+        $ret .= $this->renderXMLCloseTag('rss');
+        
         return $ret;
     }
     
@@ -65,4 +88,4 @@ class actionRSS implements iAction {
    </item>
  </channel>
 
- </rss>
+ </rss>*/

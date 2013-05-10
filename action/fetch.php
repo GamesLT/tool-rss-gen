@@ -19,15 +19,23 @@ class actionFetch implements iAction {
             $types = $this->getFetchers();
         }
         $db = gcDB::getInstance();
-        foreach ($types as $type) {
+        $i = 0;
+        foreach ($types as $type) {                    
             $data = $this->useFetcher($type);
             foreach ($data as $rec) {
                 $rec['type'] = $type;
-                $rec['hash'] = sha1($rec['link']) . ';' . strlen($rec['link']);
+                if (!isset($rec['id'])) {                    
+                    $link = $rec['title'];                    
+                } else {
+                    $link = $rec['id'];
+                }
+                $rec['id'] = sha1($link) . ';' . substr($link, 0, 1) . ';' . substr($link, -1) . ';' . strlen($link);
                 $rec['date'] = strtotime($rec['date']);
-                $db->quickInsert($rec, 'data');
+                if ($db->quickInsert($rec, 'data'))
+                     $i++;
             }
-        }        
+        }
+        return "Fetched. $i new items.";
     }
     
     public function useFetcher($type) {
@@ -35,7 +43,7 @@ class actionFetch implements iAction {
         if (!class_exists($class, true))
             return '';
 
-        $instance = new fetchReviews();
+        $instance = new $class();
         return $instance->fetch();
     }
     
