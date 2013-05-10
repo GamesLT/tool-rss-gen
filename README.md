@@ -19,9 +19,9 @@ P.S.: naudojamoms trečių asmenų bibliotekoms galioja atskiros licenzijos!
 
 Šiek tiek apie katalogus
 --------------------
-_libraries/_ kataloge sudėtos visos bibliotekos iš trečių šalių (joms galioja atskiros licenzijos, todėl pasidomėkite jomis patys).
-_interfaces/_ skirtas PHP interfeisų aprašymams.
- _include/_ - visi failai, kurie nėra aprašyti klasėmis ir nėra _index.php_ :) 
-_fetchers/_ - visi duomenų pasiėmėjai iš skirtingų šaltinių (paskui, jų gauti duomenis įrašomi į lentelę). 
-_class/_ - kelios naudojamos klasės. 
-_action/_ - veiksmai, kurios gali atlikti šis įrankis (kol kas yra _rss_ bei _fetch_; pirmas parodo antras pasiima).
+*   _libraries/_ kataloge sudėtos visos bibliotekos iš trečių šalių (joms galioja atskiros licenzijos, todėl pasidomėkite jomis patys).
+*   _interfaces/_ skirtas PHP interfeisų aprašymams.
+*   _include/_ - visi failai, kurie nėra aprašyti klasėmis ir nėra _index.php_ :) 
+*   _fetchers/_ - visi duomenų pasiėmėjai iš skirtingų šaltinių (paskui, jų gauti duomenis įrašomi į lentelę). 
+*   _class/_ - kelios naudojamos klasės. 
+*   _action/_ - veiksmai, kurios gali atlikti šis įrankis (kol kas yra _rss_ bei _fetch_; pirmas parodo antras pasiima).
