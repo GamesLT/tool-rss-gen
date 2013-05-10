@@ -14,6 +14,14 @@ class fetchReviews {
         '"{game}"!!!',
     );
 
+    function getTable() {
+        return 'data';
+    }
+    
+    function getMode() {
+        return array();
+    }
+
     public function fetch() {
 
         class_exists('simple_html_dom_node', true);

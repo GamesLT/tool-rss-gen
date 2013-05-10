@@ -20,31 +20,49 @@ class actionFetch implements iAction {
         }
         $db = gcDB::getInstance();
         $i = 0;
+        $data = array();
+        $table = null;
+        $mode = null;
         foreach ($types as $type) {                    
-            $data = $this->useFetcher($type);
+            $this->useFetcher($type, $data, $table, $mode);
             foreach ($data as $rec) {
                 $rec['type'] = $type;
                 if (!isset($rec['id'])) {                    
-                    $link = $rec['title'];                    
+                    $link = isset($rec['title'])?$rec['title']:$rec['link'];
                 } else {
                     $link = $rec['id'];
                 }
                 $rec['id'] = sha1($link) . ';' . substr($link, 0, 1) . ';' . substr($link, -1) . ';' . strlen($link);
-                $rec['date'] = strtotime($rec['date']);
-                if ($db->quickInsert($rec, 'data'))
-                     $i++;
+                if (isset($rec['date']))
+                    $rec['date'] = strtotime($rec['date']);
+                if ($db->recordExists($rec['id'], $table)) {
+                    foreach ($mode as $field => $what) 
+                        switch ($what) {
+                            case 'increase':
+                                $sql = sprintf('UPDATE `%s` SET `%s` = `%s` + %d WHERE id = \'%s\'', $table, $field, $field, $rec[$field], $rec['id']);
+                                $db->query($sql);
+                            break;
+                            case 'update':
+                                $sql = sprintf('UPDATE `%s` SET `%s` = \'%s\' WHERE id = \'%s\'', $table, $field, str_replace('\'', '\'\'', $rec[$field]), $rec['id']);
+                                $db->query($sql);
+                            break;
+                        }
+                } elseif ($db->quickInsert($rec, $table))
+                   $i++;
             }
         }
         return "Fetched. $i new items.";
     }
     
-    public function useFetcher($type) {
+    public function useFetcher($type, &$data, &$table, &$mode) {
         $class = 'fetch' . ucfirst($type);
         if (!class_exists($class, true))
             return '';
 
         $instance = new $class();
-        return $instance->fetch();
+        $data = $instance->fetch();
+        $table = $instance->getTable();
+        $mode = $instance->getMode();
     }
     
     public function getFetchers() {

@@ -20,6 +20,15 @@ class gcDB extends mysqli {
         }
     }
     
+    public function recordExists($table, $id) {
+        $sql = sprintf('SELECT 1 rt FROM `%s` WHERE id = \'%s\' LIMIT 1', $table, $id);
+        $ret = $this->query($sql);
+        if (!$ret)
+            return false;
+        $line = $ret->fetch_assoc();
+        return isset($line['rt']);
+    }
+    
     public function makeArraySmaller(&$array) {                
         foreach ($array as $key => $value) {
             if (is_array($value))

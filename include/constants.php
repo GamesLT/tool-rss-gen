@@ -1,6 +1,6 @@
 <?php
 
-define('DB_HOST', 'localhost');
+define('DB_HOST', '192.168.1.4');
 define('DB_USER', 'gameslt_stuff');
 define('DB_PASS', 'QmGLAWvk');
 define('DB_TYPE', 'mysql');

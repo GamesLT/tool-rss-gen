@@ -6,6 +6,10 @@
  */
 interface iFetcher {
     
+    function getTable();
+    
     function fetch();
+    
+    function getMode();
     
 }
