@@ -7,12 +7,28 @@
  */
 class fetchReviews {
 
-    protected static $msg = array(
-        'Žinot ką? Ogi turime "{game}" apžvalgą!',
-        'Yey!!! "{game}" ką tik sulaukė apžvalgos!',
-        '{author} ką tik iškepė naują "{game}" žaidimo apžvalgą!',
-        '"{game}"!!!',
-    );
+     public function getMessages() {
+        static $msgs = null;
+        if ($msgs === null) {
+            $msgs = gcCache::get('review_messages');
+            if (!$msgs) {
+                $db = gcDB::getInstance();
+                $msgs = $db->quickFetch('1', 'review_messages', array('msg'), true);
+                if (empty($msgs)) {
+                    foreach (array(
+                'Žinot ką? Ogi turime "{game}" apžvalgą!',
+                'Yey!!! "{game}" ką tik sulaukė apžvalgos!',
+                '{author} ką tik iškepė naują "{game}" žaidimo apžvalgą!',
+                '"{game}"!!!',
+                    ) as $msg)
+                        $db->quickInsert(array('msg' => $msg), 'review_messages');
+                    $msgs = $db->quickFetch('1', 'review_messages', array('msg'), true);
+                }
+                gcCache::set('review_messages', $msgs);
+            }
+        }
+        return $msgs;
+    }
 
     function getTable() {
         return 'data';
@@ -44,7 +60,8 @@ class fetchReviews {
                 $ret[] = $line;
         }
 
-        $count = count(self::$msg) - 1;
+        $msgs = $this->getMessages();
+        $count = count($msgs) - 1;
         $f1 = array(
             '{title}',
             '{platform}',
@@ -59,7 +76,7 @@ class fetchReviews {
                 $line['game']
             );
             $ret[$i]['text'] = str_replace(
-                    $f1, $f2, self::$msg[mt_rand(0, $count)]
+                    $f1, $f2, $msgs[mt_rand(0, $count)]
             );
         }
 

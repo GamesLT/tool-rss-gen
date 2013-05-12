@@ -25,28 +25,35 @@ class actionFetch implements iAction {
         $mode = null;
         foreach ($types as $type) {                    
             $this->useFetcher($type, $data, $table, $mode);
-            foreach ($data as $rec) {
-                $rec['type'] = $type;
-                if (!isset($rec['id'])) {                    
-                    $link = isset($rec['title'])?$rec['title']:$rec['link'];
-                } else {
-                    $link = $rec['id'];
-                }
-                $rec['id'] = sha1($link) . ';' . substr($link, 0, 1) . ';' . substr($link, -1) . ';' . strlen($link);
-                if (isset($rec['date']))
-                    $rec['date'] = strtotime($rec['date']);
-                if ($db->recordExists($rec['id'], $table)) {
+            $ids = array();
+            foreach ($data as $k => $rec) {
+                $data[$k]['type'] = $type;                
+                $link = isset($rec['title'])?$rec['title']:$rec['link'];
+                $data[$k]['hash'] = str_pad(sha1($link) . ';' . substr($link, 0, 1) . ';' . substr($link, -1) . ';' . strlen($link), 50, '_', STR_PAD_LEFT);
+                $ids[] = $data[$k]['hash'];
+                if (isset($data[$k]['date']))
+                    $data[$k]['date'] = strtotime($data[$k]['date']);
+            }
+            $exists_ids = $db->recordExists($ids, $table, 'hash');
+            if (!is_array($exists_ids))
+                $exists_ids = array();
+            foreach ($data as $rec) {            
+                if (in_array($rec['hash'], $exists_ids)) {
+                    $update = array();
                     foreach ($mode as $field => $what) 
                         switch ($what) {
                             case 'increase':
-                                $sql = sprintf('UPDATE `%s` SET `%s` = `%s` + %d WHERE id = \'%s\'', $table, $field, $field, $rec[$field], $rec['id']);
-                                $db->query($sql);
+                                $update[] = sprintf('`%s` = `%s` + %d', $field, $field, $rec[$field]);
                             break;
                             case 'update':
-                                $sql = sprintf('UPDATE `%s` SET `%s` = \'%s\' WHERE id = \'%s\'', $table, $field, str_replace('\'', '\'\'', $rec[$field]), $rec['id']);
-                                $db->query($sql);
+                                $update[] = sprintf('`%s` = \'%s\'', $field, str_replace('\'', '\'\'', $rec[$field]));
                             break;
                         }
+                    if (!empty($update))  {
+                        $sql = sprintf('UPDATE `%s` SET %s WHERE hash = \'%s\'', $table, implode(', ', $update), $rec['hash']);
+                        $db->query($sql);
+                    }                        
+                     
                 } elseif ($db->quickInsert($rec, $table))
                    $i++;
             }

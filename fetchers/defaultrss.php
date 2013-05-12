@@ -9,7 +9,7 @@ class fetchDefaultRSS {
 
     function getInterestingSpecialWords() {
         $db = gcDB::getInstance();
-        $mwords = $db->quickFetch('1', 'magic_words');
+        $mwords = $db->quickFetch('1', 'magic_words', array('word'), true);
         if (empty($mwords)) {
             foreach (array(
                 'gta',
@@ -25,10 +25,7 @@ class fetchDefaultRSS {
                 $db->quickInsert(array('word' => $word, 'id' => $i), 'magic_words');
             }
             $mwords = $this->getInterestingSpecialWords();
-        } else {
-            foreach ($mwords as $k => $mword)
-                $mwords[$k] = $mword['word'];
-        }
+        } 
         return $mwords;
     }
     
@@ -55,7 +52,11 @@ class fetchDefaultRSS {
         if ($keywords == null) {
             $keywords = gcCache::get('magic_keywords');
             if (!$keywords) {
-                $keywords = array_merge($this->getInterestingSpecialWords(), $this->getInterestingGames());
+                $igames = $this->getInterestingGames();
+                if (empty($igames))
+                    $keywords = $this->getInterestingSpecialWords();
+                else
+                    $keywords = array_merge($this->getInterestingSpecialWords(), $igames);
                 foreach (array_values($keywords) as $keyword) {
                     $parts = explode(':', $keyword);
                     if (count($parts) > 1) {
